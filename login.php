@@ -1,5 +1,8 @@
 <?php
-session_start();
+// Memastikan session berjalan dengan aman di serverless
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 require_once 'config.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -16,7 +19,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($user && password_verify($password, $user['password'])) {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
-            header("Location: index.php");
+            
+            // PERBAIKAN: Menggunakan redirect JavaScript agar pasti tereksekusi di Vercel
+            // dan diarahkan ke '/' (bukan index.php) sesuai aturan vercel.json kita.
+            echo "<script>
+                    alert('Login Berhasil!');
+                    window.location.href = '/';
+                  </script>";
             exit;
         } else {
             $error = "Username atau password salah";
@@ -175,7 +184,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </div>
         <?php endif; ?>
 
-        <form method="POST">
+        <form action="/login.php" method="POST">
             <div class="form-group">
                 <label for="username">Username atau Email</label>
                 <input type="text" id="username" name="username" required>
@@ -190,7 +199,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </form>
 
         <div class="register-link">
-            Belum punya akun? <a href="register.php">Daftar di sini</a>
+            Belum punya akun? <a href="/register.php">Daftar di sini</a>
         </div>
     </div>
 </body>
