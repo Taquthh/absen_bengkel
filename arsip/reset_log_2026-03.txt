@@ -1,0 +1,15 @@
+=== RESET BULANAN ABSENSI ===
+Tanggal: 02/03/2026 01:12:32
+Periode: March 2026
+
+RINGKASAN RESET:
+- User: daus
+  Records dihapus: 23
+  Total hari: 23
+  Total jam: 149 jam 48 menit
+  File arsip: arsip_absensi_daus_2026-03.xls
+
+File Excel yang dibuat:
+- arsip_absensi_daus_2026-03.xls
+
+=== SELESAI ===
