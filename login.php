@@ -1,8 +1,18 @@
 <?php
-// Memastikan session berjalan dengan aman di serverless
+// 1. Memastikan session berjalan dengan aman di serverless
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+// 2. PERBAIKAN LOGIKA: Jika user SUDAH login, langsung tendang ke halaman utama ('/')
+// Ini wajib ada di halaman login agar tidak terjadi infinite loop (ERR_TOO_MANY_REDIRECTS)
+if (isset($_SESSION['user_id'])) {
+    header("Location: /");
+    exit;
+}
+
+// 3. Load file konfigurasi database
+// Pastikan di dalam config.php, jika PDO gagal terhubung, gunakan try-catch agar tidak merusak routing Vercel
 require_once 'config.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -12,23 +22,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (empty($username) || empty($password)) {
         $error = "Username dan password harus diisi";
     } else {
-        $stmt = $pdo->prepare("SELECT id, username, password FROM users WHERE username = ? OR email = ?");
-        $stmt->execute([$username, $username]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        try {
+            $stmt = $pdo->prepare("SELECT id, username, password FROM users WHERE username = ? OR email = ?");
+            $stmt->execute([$username, $username]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($user && password_verify($password, $user['password'])) {
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['username'] = $user['username'];
-            
-            // PERBAIKAN: Menggunakan redirect JavaScript agar pasti tereksekusi di Vercel
-            // dan diarahkan ke '/' (bukan index.php) sesuai aturan vercel.json kita.
-            echo "<script>
-                    alert('Login Berhasil!');
-                    window.location.href = '/';
-                  </script>";
-            exit;
-        } else {
-            $error = "Username atau password salah";
+            if ($user && password_verify($password, $user['password'])) {
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['username'] = $user['username'];
+                
+                // Menggunakan JavaScript redirect sudah benar untuk lingkungan serverless/Vercel
+                echo "<script>
+                        alert('Login Berhasil!');
+                        window.location.href = '/';
+                      </script>";
+                exit;
+            } else {
+                $error = "Username atau password salah";
+            }
+        } catch (PDOException $e) {
+            // Jika database bermasalah (Connection refused), tangkap di sini agar tidak looping redirect
+            $error = "Gagal terhubung ke database server.";
         }
     }
 }
