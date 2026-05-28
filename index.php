@@ -769,10 +769,10 @@ function formatHours($hours) {
         document.getElementById('attendanceForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
-            if (!hasSignature) {
-                alert('Silakan tanda tangan terlebih dahulu!');
-                return;
-            }
+            // if (!hasSignature) {
+            //     alert('Silakan tanda tangan terlebih dahulu!');
+            //     return;
+            // }
 
             const formData = new FormData();
             formData.append('day', document.getElementById('day').value);
