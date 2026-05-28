@@ -33,30 +33,30 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     // Save signature as image file
-    $signature_filename = null;
-    if (!empty($signature)) {
-        // Create signatures directory if it doesn't exist
-        $signature_dir = 'signatures';
-        if (!is_dir($signature_dir)) {
-            mkdir($signature_dir, 0755, true);
-        }
+    // $signature_filename = null;
+    // if (!empty($signature)) {
+    //     // Create signatures directory if it doesn't exist
+    //     $signature_dir = 'signatures';
+    //     if (!is_dir($signature_dir)) {
+    //         mkdir($signature_dir, 0755, true);
+    //     }
 
-        // Extract base64 data from data URL
-        $signature_data = explode(',', $signature)[1];
-        $signature_decoded = base64_decode($signature_data);
+    //     // Extract base64 data from data URL
+    //     $signature_data = explode(',', $signature)[1];
+    //     $signature_decoded = base64_decode($signature_data);
 
-        // Generate unique filename
-        $signature_filename = 'signature_' . $user_id . '_' . time() . '.png';
-        $signature_path = $signature_dir . '/' . $signature_filename;
+    //     // Generate unique filename
+    //     $signature_filename = 'signature_' . $user_id . '_' . time() . '.png';
+    //     $signature_path = $signature_dir . '/' . $signature_filename;
 
-        // Save image file
-        if (file_put_contents($signature_path, $signature_decoded)) {
-            // File saved successfully
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Failed to save signature image']);
-            exit;
-        }
-    }
+    //     // Save image file
+    //     if (file_put_contents($signature_path, $signature_decoded)) {
+    //         // File saved successfully
+    //     } else {
+    //         echo json_encode(['success' => false, 'message' => 'Failed to save signature image']);
+    //         exit;
+    //     }
+    // }
 
     // Insert attendance
     $stmt = $pdo->prepare("INSERT INTO attendance (user_id, day, date, start_time, end_time, total_hours, signature) VALUES (?, ?, ?, ?, ?, ?, ?)");
