@@ -1,8 +1,19 @@
 <?php
-session_start();
+// 1. Jalankan session dengan aman
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// 2. PERBAIKAN: Jika session kosong di Vercel, coba pulihkan dari Cookie cadangan
+if (!isset($_SESSION['user_id']) && isset($_COOKIE['logged_in_user'])) {
+    $_SESSION['user_id'] = $_COOKIE['logged_in_user'];
+    $_SESSION['username'] = $_COOKIE['username_user']; // jika dibutuhkan di halaman ini
+}
+
 require_once 'config.php';
 
-// Check if user is logged in
+// 3. Cek kembali, jika di session TETAP kosong (artinya di cookie juga tidak ada)
+// Baru kita lempar user ke halaman login.php
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
@@ -13,6 +24,14 @@ $user_id = $_SESSION['user_id'];
 $stmt = $pdo->prepare("SELECT username FROM users WHERE id = ?");
 $stmt->execute([$user_id]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Jika karena suatu hal user tidak ditemukan di database (id palsu dari cookie)
+if (!$user) {
+    // Hapus cookie dan paksa login ulang
+    setcookie('logged_in_user', '', time() - 3600, '/');
+    header("Location: login.php");
+    exit;
+}
 
 // Get attendance data for current user
 $stmt = $pdo->prepare("SELECT * FROM attendance WHERE user_id = ? ORDER BY created_at ASC");
