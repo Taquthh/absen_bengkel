@@ -17,16 +17,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($user && password_verify($password, $user['password'])) {
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['username'] = $user['username'];
-            
-            // PERBAIKAN: Menggunakan redirect JavaScript agar pasti tereksekusi di Vercel
-            // dan diarahkan ke '/' (bukan index.php) sesuai aturan vercel.json kita.
-            echo "<script>
-                    alert('Login Berhasil!');
-                    window.location.href = '/';
-                  </script>";
-            exit;
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['username'] = $user['username'];
+        
+        // UTAMA: Set cookie cadangan selama 1 hari agar awet saat pindah halaman di Vercel
+        setcookie('logged_in_user', $user['id'], time() + 86400, "/", "", true, true);
+        setcookie('username_user', $user['username'], time() + 86400, "/", "", true, true);
+
+        echo "<script>
+                alert('Login Berhasil!');
+                window.location.href = '/';
+            </script>";
+        exit;
         } else {
             $error = "Username atau password salah";
         }
